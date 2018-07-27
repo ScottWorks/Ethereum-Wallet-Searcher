@@ -26,13 +26,9 @@ class TransactionCard extends Component {
         <p>To: {transaction.to}</p>
         <p>Time: {transaction.time}</p>
         <p>Memos: </p>
-        {/* {transaction.memo && transaction.memo.length > 0 ? (
-          <DisplayMemos memos={transaction.memo} />
-        ) : null} */}
 
         <form onSubmit={(e) => addMemo(e, transaction.tx_hash, memoInput)}>
           <label>
-            {/* Add Memo:{' '} */}
             <textarea
               type="text"
               placeholder={transaction.memo ? transaction.memo : null}
