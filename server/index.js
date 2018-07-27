@@ -7,7 +7,7 @@ dotenv.config();
 const app = express();
 app.use(bodyParser.json());
 
-const { SERVE_PORT, ETHERSCAN_API_TOKEN } = process.env;
+const { SERVER_PORT, ETHERSCAN_API_TOKEN } = process.env;
 
 app.get('/api/transactions/:address', (req, res) => {
   const { address } = req.params;
@@ -21,4 +21,4 @@ app.get('/api/transactions/:address', (req, res) => {
     });
 });
 
-app.listen(SERVE_PORT, () => console.log(`Listening on port: ${SERVE_PORT}`));
+app.listen(SERVER_PORT, () => console.log(`Listening on port: ${SERVER_PORT}`));
