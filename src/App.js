@@ -7,14 +7,14 @@ import TransactionList from './TransactionList';
 import './App.css';
 
 function getLocalStorage() {
-  if (localStorage.getItem("storedMemos") != null) {
-    return JSON.parse(localStorage.getItem("storedMemos"))
+  if (localStorage.getItem('storedMemos') != null) {
+    return JSON.parse(localStorage.getItem('storedMemos'));
   } else {
     return [];
   }
 }
 
-const initilizeStorage = getLocalStorage()
+const initilizeStorage = getLocalStorage();
 
 class App extends Component {
   constructor() {
@@ -25,12 +25,14 @@ class App extends Component {
       storedMemos: initilizeStorage
     };
 
-    this.getTransactions = this.getTransactions.bind(this)
+    this.getTransactions = this.getTransactions.bind(this);
     this.addMemo = this.addMemo.bind(this);
-    this.convertTimeStamp = this.convertTimeStamp.bind(this)
-    this.getMemos = this.getMemos.bind(this)
-    this.convertArrayOfObjectsToCSV = this.convertArrayOfObjectsToCSV.bind(this)
-    this.exportCSV = this.exportCSV.bind(this)
+    this.convertTimeStamp = this.convertTimeStamp.bind(this);
+    this.getMemos = this.getMemos.bind(this);
+    this.convertArrayOfObjectsToCSV = this.convertArrayOfObjectsToCSV.bind(
+      this
+    );
+    this.exportCSV = this.exportCSV.bind(this);
   }
   handleChange(key, value) {
     this.setState({
@@ -42,18 +44,17 @@ class App extends Component {
     const { address } = this.state;
 
     axios.get(`/api/transactions/${address}`).then((res) => {
-
-      const transactions = res.data.result.map(elem => {
+      const transactions = res.data.result.map((elem) => {
         let inOut;
 
-        if (address.toLowerCase() == elem.from.toLowerCase()) {
-          inOut = "OUT"
+        if (address.toLowerCase() === elem.from.toLowerCase()) {
+          inOut = 'OUT';
         } else {
-          inOut = "IN"
+          inOut = 'IN';
         }
 
         let formattedTime = this.convertTimeStamp(elem.timeStamp, 'L');
-        let memos = this.getMemos(elem.hash)
+        let memos = this.getMemos(elem.hash);
 
         return {
           from: elem.from,
@@ -62,8 +63,8 @@ class App extends Component {
           tx_hash: elem.hash,
           time: formattedTime,
           memo: memos
-        }
-      })
+        };
+      });
 
       this.setState({
         address: '',
@@ -75,14 +76,33 @@ class App extends Component {
   addMemo(event, tx_hash, memo) {
     event.preventDefault();
     const { storedMemos } = this.state;
+    let flag = false;
+    let duplicateIdx;
     const newMemo = [...storedMemos];
 
-    newMemo.push({
-      tx_hash: tx_hash,
-      memo: memo
+    storedMemos.forEach((elem, idx) => {
+      if (elem != null && elem.tx_hash == tx_hash) {
+        flag = true;
+        duplicateIdx = idx;
+      }
     });
 
-    localStorage.setItem("storedMemos", JSON.stringify(newMemo));
+    if (flag) {
+      newMemo.splice(duplicateIdx, 1, {
+        tx_hash: tx_hash,
+        memo: memo
+      });
+    } else {
+      newMemo.push({
+        tx_hash: tx_hash,
+        memo: memo
+      });
+    }
+
+    console.log(tx_hash, storedMemos);
+
+    localStorage.clear();
+    localStorage.setItem('storedMemos', JSON.stringify(newMemo));
 
     this.setState({
       storedMemos: newMemo
@@ -95,16 +115,18 @@ class App extends Component {
   }
 
   getMemos(tx_hash) {
-    const { storedMemos } = this.state
+    const { storedMemos } = this.state;
     let memoArray = [];
 
-    storedMemos.map(elem => {
-      if (tx_hash === elem.tx_hash) {
-        memoArray.push(elem.memo)
-      }
-    })
+    if (storedMemos[0] != null && storedMemos.length > 0) {
+      storedMemos.map((elem) => {
+        if (tx_hash === elem.tx_hash) {
+          memoArray.push(elem.memo);
+        }
+      });
+    }
 
-    return memoArray
+    return memoArray;
   }
 
   convertArrayOfObjectsToCSV(args) {
@@ -124,9 +146,9 @@ class App extends Component {
     result += keys.join(columnDelimiter);
     result += lineDelimiter;
 
-    data.forEach(function (item) {
+    data.forEach(function(item) {
       ctr = 0;
-      keys.forEach(function (key) {
+      keys.forEach(function(key) {
         if (ctr > 0) result += columnDelimiter;
 
         result += item[key];
@@ -139,12 +161,12 @@ class App extends Component {
   }
 
   exportCSV() {
-    const { transactions } = this.state
+    const { transactions } = this.state;
     var data, filename, link;
     var csv = this.convertArrayOfObjectsToCSV(transactions);
 
     if (csv == null) {
-      console.log('NULL!')
+      console.log('NULL!');
       return;
     }
 
@@ -160,7 +182,6 @@ class App extends Component {
     link.setAttribute('download', filename);
     link.click();
   }
-
 
   render() {
     const { address, transactions, storedMemos } = this.state;
